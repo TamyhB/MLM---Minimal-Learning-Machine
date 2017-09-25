@@ -12,19 +12,21 @@ class MLM():
         pontos_referenciaX = []
         pontos_referenciaY = []
 
-    def calcula_distancia(self, X, Y):
+
+    def treinamento(self, X, Y):
         '''
 
-        :param X:
-        :param Y:
-        :return:
+        :param X: matriz X
+        :param Y: matriz Y
+        :return: B_hat, pontos de refencias X e Y
         '''
 
-        auxA = self.random_pontos_referencias(X.shape[0])
         self.pontos_referenciaX, self.pontos_referenciaY = self.random_pontos_referencias(Y.shape[0], X, Y)
-        dX = []
-        dY = []
-        #Faca a distancia dos dois pontos = raiz2((dp - dx)ˆ2)
+        #matrizes de distancias
+        dX = np.zeros(shape=(self.numero_pontos_referencia, X.shape[1]))
+        dY = np.zeros(shape=(self.numero_pontos_referencia, Y.shape[1]))
+
+        #Faca a distancia dos dois pontos = raiz2((dp - dx)^2)
 
         '''
             for para calcular a distancia. Acho que ta errado esse for, conserto depois :v
@@ -32,12 +34,12 @@ class MLM():
         for i in range(X.shape[0]):
             for j in range(len(self.pontos_referenciaX)-1):
                 for t in range(X.shape[1]):
-                    dX.append(math.sqrt((self.pontos_referenciaX[i][j] - X[i][j]) ** 2))
+                    dX[i][j] = (math.sqrt((self.pontos_referenciaX[i][j] - X[i][j]) ** 2))
 
         for i in range(Y.shape[0]):
             for j in range(len(self.pontos_referenciaY)-1):
                 for t in range(X.shape[1]):
-                    dY.append(math.sqrt((self.pontos_referenciaY[i][j] - Y[i][j])**2))
+                    dX[i][j] = (math.sqrt((self.pontos_referenciaY[i][j] - Y[i][j])**2))
 
         B_hat = np.linalg.solve(dX,dY)
         self.B_hat = B_hat
@@ -45,15 +47,21 @@ class MLM():
 
 
 
-    def random_pontos_referencias(self, tamanho, A, Y):
+    def random_pontos_referencias(self, tamanho, X, Y):
+        '''
+        :param tamanho: para saber o random.int usado
+        :param X: Matriz de amostras
+        :param Y: Matriz de rotulos de amostras
+        :return: pontos de referencias
+        '''
         random_indices = []
         random_pontosA = []
         random_pontosY = []
-        for i in range(tamanho):
+        for i in range(self.numero_pontos_referencia):
             ponto = np.random.randint(tamanho)
             if ponto in random_indices == False:
                 random_indices.append(ponto)
-                random_pontosA.append(A[ponto])
+                random_pontosA.append(X[ponto])
                 random_pontosY.append(Y[ponto])
 
 
@@ -61,6 +69,13 @@ class MLM():
 
 
     def predict(self, amostraT):
+        '''
+
+        :param amostraT: amostra de treinamento, ou seja, vc manda uma amostra por vez
+        :return: predicao da amostra (Vimos o seu futuro, ele diz que vc eh Versiculor Mwahhahaha)
+        '''
+
+        #Array que vai guardar a distancia
         DamostraT = []
 
 
@@ -73,9 +88,12 @@ class MLM():
 
         pred_hat = np.dot(amostraT, self.B_hat)
         min_pred_hat = min(pred_hat)
-        #argsort()
-        predicao = np.where(self.pontos_referenciaX == min_pred_hat)[0]
-        return predicao
+
+        predicaoIndice = np.where(self.pontos_referenciaX == min_pred_hat)[0]
+        return self.pontos_referenciaY[predicaoIndice]
+
+
+
 #x = database.load_iris()
 #xd = x.data
 #print xd
