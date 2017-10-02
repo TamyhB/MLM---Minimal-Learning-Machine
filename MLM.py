@@ -88,20 +88,35 @@ class MLM():
 
 
     def binarizar(self, y):
-        biny = np.zeros((y.shape[0], np.amax(y) + 1))
+        bin_ = np.zeros((y.shape[0], np.amax(y) + 1))
         for i in range(len(y)):
-            biny[i][y[i]] = 1
-        return biny
+            bin_[i][y[i]] = 1
+        return bin_
+
+    def uniqueValues (self, X, y):
+        Xn = [X[0]]
+        yn = [y[0]]
+        for i in range(len(X)):
+            if not np.any(np.equal(Xn, X[i]).all(1)):
+                Xn.append(X[i])
+                yn.append(y[i])
+
+        return np.array(Xn), np.array(yn)
+
+
 
 
 
 mlmT = MLM(40)
 iris = database.load_iris()
-X = iris.data
-y = mlmT.binarizar(iris.target)
+Xload = iris.data
+yload = mlmT.binarizar(iris.target)
+X, y = mlmT.uniqueValues(Xload,yload)
 acertosInteracoes = []
-'''
-for i in range(20):
+
+
+
+for i in range(30):
     Xl, Xt, yl, yt = train_test_split(X, y, test_size=0.2)
     mlmT.treinamento(Xl, yl)
     predictXt = mlmT.predict(Xt)
@@ -109,14 +124,5 @@ for i in range(20):
     for j in range(len(yt)):
         acertos += int(np.array_equal(yt[j],predictXt[j]))
     acertosInteracoes.append(acertos)
-'''
-
-Xl, Xt, yl, yt = train_test_split(X, y, test_size=0.2)
-mlmT.treinamento(Xl, yl)
-predictXt = mlmT.predict(Xt)
-acertos = 0
-for j in range(len(yt)):
-    acertos += int(np.array_equal(yt[j],predictXt[j]))
-acertosInteracoes.append(acertos)
 
 print acertos
